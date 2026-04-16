@@ -16,19 +16,13 @@ class TextFilter(admin.SimpleListFilter):
     form_class = SearchForm
 
     def has_output(self) -> bool:
-        return True
+        pass
 
     def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> tuple:
-        return ()
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        yield {
-            "form": self.form_class(
-                name=self.parameter_name,
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                data={self.parameter_name: self.value()},
-            ),
-        }
+        pass
 
 
 class FieldTextFilter(ValueMixin, admin.FieldListFilter):
@@ -49,13 +43,7 @@ class FieldTextFilter(ValueMixin, admin.FieldListFilter):
         super().__init__(field, request, params, model, model_admin, field_path)
 
     def expected_parameters(self) -> list[str | None]:
-        return [self.lookup_kwarg]
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                data={self.lookup_kwarg: self.value()},
-            ),
-        }
+        pass

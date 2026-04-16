@@ -15,7 +15,7 @@ class InfinitePaginator(Paginator):
 
     @cached_property
     def count(self):
-        return 9_999_999_999
+        pass
 
     def _get_page(self, *args, **kwargs):
-        return InfinitePage(*args, **kwargs)
+        pass

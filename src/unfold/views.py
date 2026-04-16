@@ -36,24 +36,18 @@ class DatasetChangeList(ChangeList):
         super().__init__(request, *args, **kwargs)
 
     def get_results(self, request: HttpRequest) -> None:
-        try:
-            self.page_num = int(request.GET.get(self.page_var, 1))
-        except ValueError:
-            self.page_num = 1
-
-        super().get_results(request)
+        pass
 
     def get_queryset(
         self, request: HttpRequest, exclude_parameters: list[str | None] | None = None
     ) -> QuerySet:
-        self.query = self.dataset_search_query
-        return super().get_queryset(request, exclude_parameters)
+        pass
 
     def get_filters(
         self, request: str
     ) -> tuple[list[ListFilter], bool, dict[str, bool | str], bool, bool]:
         # Disable filters for dataset
-        return ([], False, {}, False, False)
+        pass
 
 
 class UnfoldModelAdminViewMixin(PermissionRequiredMixin):

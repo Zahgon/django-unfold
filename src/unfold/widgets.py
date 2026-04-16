@@ -289,41 +289,7 @@ class UnfoldPrefixSuffixMixin(Input):
     def get_context(
         self, name: str, value: Any, attrs: dict[str, Any] | None
     ) -> dict[str, Any]:
-        context = super().get_context(name, value, attrs)
-        widget = context["widget"]
-
-        if "prefix" in self.attrs:
-            widget["prefix"] = self.attrs["prefix"]
-            del self.attrs["prefix"]
-
-        if "prefix_icon" in self.attrs:
-            widget["prefix_icon"] = self.attrs["prefix_icon"]
-            self.attrs["class"] = " ".join([self.attrs["class"], "pl-9"])
-            del self.attrs["prefix_icon"]
-
-        if "suffix" in self.attrs:
-            widget["suffix"] = self.attrs["suffix"]
-            del self.attrs["suffix"]
-
-        if "suffix_icon" in self.attrs:
-            widget["suffix_icon"] = self.attrs["suffix_icon"]
-            self.attrs["class"] = " ".join([self.attrs["class"], "pr-9"])
-            del self.attrs["suffix_icon"]
-
-        widget.update(
-            {
-                "name": name,
-                "is_hidden": self.is_hidden,
-                "required": self.is_required,
-                "value": self.format_value(value),
-                "attrs": self.build_attrs(self.attrs, attrs),
-                "template_name": self.template_name,
-            }
-        )
-
-        return {
-            "widget": widget,
-        }
+        pass
 
 
 class UnfoldAdminTextInputWidget(UnfoldPrefixSuffixMixin, AdminTextInputWidget):
@@ -394,7 +360,7 @@ class UnfoldAdminIntegerRangeWidget(MultiWidget):
         super().__init__(_widgets, attrs)
 
     def decompress(self, value: str | None) -> tuple[Callable | None, ...]:
-        return (value.lower, value.upper) if value else (None, None)
+        pass
 
 
 class UnfoldAdminEmailInputWidget(AdminEmailInputWidget):
@@ -413,25 +379,7 @@ class FileFieldMixin(ClearableFileInput):
     def get_context(
         self, name: str, value: Any, attrs: dict[str, Any] | None
     ) -> dict[str, Any]:
-        widget = super().get_context(name, value, attrs)
-
-        widget["widget"].update(
-            {
-                "class": " ".join([*CHECKBOX_CLASSES, *["form-check-input"]]),
-                "file_wrapper_class": " ".join(FILE_CLASSES),
-                "file_input_class": " ".join(
-                    [
-                        self.attrs.get("class", ""),
-                        *[
-                            "opacity-0",
-                            "pointer-events-none",
-                        ],
-                    ]
-                ),
-            }
-        )
-
-        return widget
+        pass
 
 
 class UnfoldAdminImageFieldWidget(FileFieldMixin, AdminFileWidget):
@@ -622,19 +570,7 @@ class UnfoldAdminSplitDateTimeVerticalWidget(AdminSplitDateTime):
     def get_context(
         self, name: str, value: Any, attrs: dict[str, Any] | None
     ) -> dict[str, Any]:
-        context = super().get_context(name, value, attrs)
-
-        if self.date_label is not None:
-            context["date_label"] = self.date_label
-        else:
-            context["date_label"] = _("Date")
-
-        if self.time_label is not None:
-            context["time_label"] = self.time_label
-        else:
-            context["time_label"] = _("Time")
-
-        return context
+        pass
 
 
 class UnfoldAdminIntegerFieldWidget(AdminIntegerFieldWidget):
@@ -788,9 +724,7 @@ class UnfoldAdminRadioSelectWidget(AdminRadioSelect):
         self.attrs["class"] = " ".join([*RADIO_CLASSES, self.attrs.get("class", "")])
 
     def get_context(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context(*args, **kwargs)
-        context.update({"radio_style": self.radio_style})
-        return context
+        pass
 
 
 class UnfoldAdminCheckboxSelectMultipleWidget(CheckboxSelectMultiple):

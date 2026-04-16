@@ -44,180 +44,64 @@ register = Library()
 def _count_errors_in_general(
     admin_form: AdminForm, inlines: list[InlineAdminFormSet]
 ) -> int:
-    count = 0
-    count += len(admin_form.errors)
-    count += len(admin_form.non_field_errors())
-
-    for inline in inlines:
-        if not getattr(inline.opts, "tab", False) and inline.formset.errors:
-            for error in inline.formset.errors:
-                if isinstance(error, dict) and len(error) > 0:
-                    count += 1
-
-    return count
+    pass
 
 
 def _count_errors_in_inline(inline: InlineAdminFormSet) -> int:
-    count = 0
-
-    for error in inline.formset.errors:
-        if isinstance(error, dict) and len(error) > 0:
-            count += 1
-
-    return count
+    pass
 
 
 def _get_tabs_list(
     context: RequestContext, page: str, opts: Options | None = None
 ) -> list:
-    tabs_list = []
-    page_id = None
-
-    if page not in ["changeform", "changelist"]:
-        page_id = page
-
-    for tab in context.get("tab_list") or []:
-        if page_id:
-            if tab.get("page") == page_id:
-                tabs_list = tab["items"]
-                break
-
-            continue
-
-        if "models" not in tab:
-            continue
-
-        for tab_model in tab["models"]:
-            if isinstance(tab_model, str):
-                if str(opts) == tab_model and page == "changelist":
-                    tabs_list = tab["items"]
-                    break
-            elif isinstance(tab_model, dict) and str(opts) == tab_model["name"]:
-                is_detail = tab_model.get("detail", False)
-
-                if (page == "changeform" and is_detail) or (
-                    page == "changelist" and not is_detail
-                ):
-                    tabs_list = tab["items"]
-                    break
-    return tabs_list
+    pass
 
 
 @register.simple_tag(name="action_list", takes_context=True)
 def action_list(context: RequestContext) -> str:
-    data = {
-        "nav_global": context.get("nav_global"),
-        "actions_detail": context.get("actions_detail"),
-        "actions_detail_hide_default": context.get("actions_detail_hide_default"),
-        "actions_list": context.get("actions_list"),
-        "actions_list_hide_default": context.get("actions_list_hide_default"),
-        "actions_items": context.get("actions_items"),
-    }
-
-    return render_to_string(
-        "unfold/helpers/tab_actions.html",
-        request=context["request"],
-        context=data,
-    )
+    pass
 
 
 @register.simple_tag(name="tab_list", takes_context=True)
 def tab_list(context: RequestContext, page: str, opts: Options | None = None) -> str:
-    inlines_list = []
-    datasets_list = []
-    data = {
-        "is_popup": context.get("is_popup"),
-        "tabs_list": _get_tabs_list(context, page, opts),
-    }
-
-    if context.get("adminform") and context.get("inline_admin_formsets"):
-        data["error_count"] = _count_errors_in_general(
-            context["adminform"],
-            context["inline_admin_formsets"],
-        )
-
-        for inline in context.get("inline_admin_formsets") or []:
-            inline.error_count = _count_errors_in_inline(inline)
-
-    # If the changeform is rendered and there are no custom tab navigation
-    # specified, check for inlines to put into tabs
-    if page == "changeform" and len(data.get("tabs_list") or []) == 0:
-        for inline in context.get("inline_admin_formsets") or []:
-            if opts and getattr(inline.opts, "tab", False):
-                inlines_list.append(inline)
-
-        if len(inlines_list) > 0:
-            data["inlines_list"] = inlines_list
-
-        for dataset in context.get("datasets") or []:
-            if dataset and getattr(dataset, "tab", False):
-                datasets_list.append(dataset)
-
-        if len(datasets_list) > 0:
-            data["datasets_list"] = datasets_list
-
-    return render_to_string(
-        "unfold/helpers/tab_list.html",
-        request=context["request"],
-        context=data,
-    )
+    pass
 
 
 @register.simple_tag(name="render_section", takes_context=True)
 def render_section(
     context: RequestContext, section_class: type[BaseSection] | str, instance: Model
 ) -> str:
-    if isinstance(section_class, str):
-        section_class: type[BaseSection] = import_string(section_class)
-
-    return section_class(context.request, instance).render()
+    pass
 
 
 @register.simple_tag(name="has_nav_item_active")
 def has_nav_item_active(items: list) -> bool:
-    for item in items:
-        if "active" in item and item["active"]:
-            return True
-
-    return False
+    pass
 
 
 @register.filter
 def has_active_item(items: list[dict]) -> bool:
-    for item in items:
-        if "active" in item and item["active"]:
-            return True
-
-    return False
+    pass
 
 
 @register.filter
 def class_name(value: Any) -> str:
-    return value.__class__.__name__
+    pass
 
 
 @register.filter
 def is_list(value: Any) -> bool:
-    return isinstance(value, list)
+    pass
 
 
 @register.filter
 def index(indexable: Mapping[int, Any], i: int) -> Any:
-    try:
-        return indexable[i]
-    except (KeyError, TypeError):
-        return None
+    pass
 
 
 @register.filter
 def tabs(adminform: AdminForm) -> list[Fieldset]:
-    result = []
-
-    for fieldset in adminform:
-        if "tab" in fieldset.classes and hasattr(fieldset, "name") and fieldset.name:
-            result.append(fieldset)
-
-    return result
+    pass
 
 
 def _flatten_context(context: Context) -> dict[str, Any]:
@@ -284,59 +168,12 @@ class RenderComponentNode(template.Node):
 
 @register.tag("component")
 def do_component(parser: Parser, token: Token) -> RenderComponentNode:
-    bits = token.split_contents()
-
-    if len(bits) < 2:  # noqa: PLR2004
-        raise TemplateSyntaxError(
-            f"{bits[0]} tag takes at least one argument: the name of the template to be included."
-        )
-
-    options = {}
-    remaining_bits = bits[2:]
-
-    while remaining_bits:
-        option = remaining_bits.pop(0)
-
-        if option in options:
-            raise TemplateSyntaxError(
-                f"The {option} option was specified more than once."
-            )
-
-        if option == "with":
-            value = token_kwargs(remaining_bits, parser, support_legacy=False)
-
-            if not value:
-                raise TemplateSyntaxError(
-                    '"with" in {bits[0]} tag needs at least one keyword argument.'
-                )
-        elif option == "include_context":
-            value = True
-        else:
-            raise TemplateSyntaxError(f"Unknown argument for {bits[0]} tag: {option}.")
-
-        options[option] = value
-
-    include_context = options.get("include_context", False)
-    nodelist = parser.parse(("endcomponent",))
-    template_name = bits[1][1:-1]
-
-    extra_context = options.get("with", {})
-    parser.next_token()
-
-    return RenderComponentNode(template_name, nodelist, extra_context, include_context)
+    pass
 
 
 @register.filter
 def add_css_class(field: BoundField, classes: list | tuple) -> BoundField:
-    if type(classes) in (list, tuple):
-        classes = " ".join(classes)
-
-    if "class" in field.field.widget.attrs:
-        field.field.widget.attrs["class"] += f" {classes}"
-    else:
-        field.field.widget.attrs["class"] = classes
-
-    return field
+    pass
 
 
 @register.inclusion_tag(
@@ -348,289 +185,61 @@ def preserve_changelist_filters(context: RequestContext) -> dict[str, dict[str, 
     """
     Generate hidden input fields to preserve filters for POST forms.
     """
-    request: HttpRequest | None = context.get("request")
-    changelist: ChangeList | None = context.get("cl")
-
-    if not request or not changelist:
-        return {"params": {}}
-
-    used_params: set[str] = {
-        param for spec in changelist.filter_specs for param in spec.used_parameters
-    }
-    preserved_params: dict[str, str] = {
-        param: value for param, value in request.GET.items() if param not in used_params
-    }
-
-    return {"params": preserved_params}
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def element_classes(context: RequestContext, key: str) -> str:
-    element_classes = context.get("element_classes") or {}
-
-    if key in element_classes:
-        if isinstance(context["element_classes"][key], list | tuple):
-            return " ".join(context["element_classes"][key])
-
-        return context["element_classes"][key]
-
-    return ""
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def fieldset_rows_classes(context: RequestContext) -> str:
-    classes = [
-        "form-rows",
-        "aligned",
-    ]
-
-    if not context.get("stacked"):
-        classes.extend(
-            [
-                "border",
-                "border-base-200",
-                "rounded-default",
-                "shadow-xs",
-                "dark:border-base-800",
-            ]
-        )
-
-    return " ".join(set(classes))
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def fieldset_row_classes(context: RequestContext) -> str:
-    classes = [
-        "form-row",
-        "field-row",
-        "group/row",
-    ]
-
-    formset = context.get("inline_admin_formset", None)
-    line = context.get("line") or []
-
-    # Hide the field in case of ordering field for sorting
-    for field in line:
-        if (
-            formset
-            and hasattr(field.field, "name")
-            and field.field.name == getattr(formset.opts, "ordering_field", None)
-            and getattr(formset.opts, "hide_ordering_field", False)
-        ):
-            classes.append("hidden")
-
-    if len(line.fields) > 1:
-        classes.extend(
-            [
-                "grid",
-                f"lg:grid-cols-{len(line.fields)}",
-            ]
-        )
-
-    if not line.has_visible_field:
-        classes.append("hidden")
-
-    return " ".join(set(classes))
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def fieldset_line_classes(context: RequestContext) -> str:
-    classes = [
-        "field-line",
-        "flex",
-        "flex-col",
-        "grow",
-        "group",
-        "group/line",
-        "px-3",
-        "py-2.5",
-    ]
-    field = context.get("field")
-    adminform = context.get("adminform")
-
-    if hasattr(field.field, "name") and field.field.name:
-        classes.append(f"field-{field.field.name}")
-
-    if hasattr(field, "errors") and field.errors():
-        classes.append("errors")
-
-    if (
-        adminform
-        and hasattr(adminform.model_admin, "compressed_fields")
-        and adminform.model_admin.compressed_fields
-    ):
-        classes.extend(
-            [
-                "border-b",
-                "border-base-200",
-                "border-dashed",
-                "min-h-[59px]",
-                "group-[.last]/row:border-b-0",
-                "lg:border-l",
-                "lg:flex-row",
-                "lg:items-center",
-                "dark:border-base-800",
-                "lg:first:border-l-0",
-            ]
-        )
-
-    return " ".join(set(classes))
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def action_item_classes(context: RequestContext, action: dict) -> str:
-    classes = [
-        "border",
-        "border-base-200",
-        "select-none",
-        "max-lg:-mt-px",
-        "max-lg:first:rounded-t-default",
-        "max-lg:last:rounded-b-default",
-        "min-lg:-ml-px",
-        "min-lg:first:rounded-l-default",
-        "min-lg:last:rounded-r-default",
-    ]
-
-    variant_classes = {
-        ActionVariant.PRIMARY: [
-            "border-primary-700",
-            "bg-primary-600",
-            "text-white",
-            "dark:border-primary-500",
-        ],
-        ActionVariant.DANGER: [
-            "border-red-700",
-            "bg-red-600",
-            "text-white",
-            "dark:border-red-500",
-        ],
-        ActionVariant.SUCCESS: [
-            "border-green-700",
-            "bg-green-600",
-            "text-white",
-            "dark:border-green-500",
-        ],
-        ActionVariant.INFO: [
-            "border-blue-700",
-            "bg-blue-600",
-            "text-white",
-            "dark:border-blue-500",
-        ],
-        ActionVariant.WARNING: [
-            "border-orange-700",
-            "bg-orange-600",
-            "text-white",
-            "dark:border-orange-500",
-        ],
-        ActionVariant.DEFAULT: [
-            "border-base-200",
-            "hover:text-primary-600",
-            "dark:hover:text-primary-500",
-            "dark:border-base-700",
-        ],
-    }
-
-    if "variant" not in action:
-        variant = ActionVariant.DEFAULT
-    else:
-        variant = action["variant"]
-
-        if isinstance(variant, str):
-            try:
-                variant = ActionVariant(variant)
-            except ValueError:
-                variant = ActionVariant.DEFAULT
-
-    classes.extend(variant_classes[variant])
-
-    return " ".join(set(classes))
+    pass
 
 
 @register.filter
 def changeform_data(adminform: AdminForm) -> str:
-    fields = {}
-
-    for fieldset in adminform:
-        for line in fieldset:
-            for field in line:
-                if isinstance(field.field, dict):
-                    continue
-
-                if isinstance(
-                    field.field.field.widget, UnfoldAdminSplitDateTimeWidget
-                ) or isinstance(field.field.field.widget, UnfoldAdminMoneyWidget):
-                    for index, _widget in enumerate(field.field.field.widget.widgets):
-                        fields[
-                            f"{field.field.name}{field.field.field.widget.widgets_names[index]}"
-                        ] = None
-                elif isinstance(field.field.field.widget, CheckboxSelectMultiple):
-                    fields[field.field.name] = []
-                else:
-                    fields[field.field.name] = None
-
-    return mark_safe(json.dumps(fields))
+    pass
 
 
 @register.filter
 def changeform_condition(
     field: AdminField | AdminReadonlyField,
 ) -> AdminField | AdminReadonlyField:
-    if isinstance(field.field, dict):
-        return field
-
-    if isinstance(field.field.field.widget, RelatedFieldWidgetWrapper):
-        field.field.field.widget.widget.attrs["x-model.fill"] = field.field.name
-        field.field.field.widget.widget.attrs["x-init"] = mark_safe(
-            f"const $ = django.jQuery; $(function () {{ const select = $('#{field.field.auto_id}'); select.on('change', (ev) => {{ {field.field.name} = select.val(); }}); }});"
-        )
-    elif isinstance(field.field.field.widget, UnfoldAdminSelect2Widget):
-        field.field.field.widget.attrs["x-model.fill"] = field.field.name
-        field.field.field.widget.attrs["x-init"] = mark_safe(
-            f"const $ = django.jQuery; $(function () {{ const select = $('#{field.field.auto_id}'); select.on('change', (ev) => {{ {field.field.name} = select.val(); }}); }});"
-        )
-    elif isinstance(
-        field.field.field.widget, UnfoldAdminSplitDateTimeWidget
-    ) or isinstance(field.field.field.widget, UnfoldAdminMoneyWidget):
-        for index, widget in enumerate(field.field.field.widget.widgets):
-            field_name = (
-                f"{field.field.name}{field.field.field.widget.widgets_names[index]}"
-            )
-
-            widget.attrs["x-model.fill"] = field_name
-    else:
-        field.field.field.widget.attrs["x-model.fill"] = field.field.name
-
-    return field
+    pass
 
 
 @register.simple_tag
 def infinite_paginator_url(cl, i):
-    return cl.get_query_string({PAGE_VAR: i})
+    pass
 
 
 @register.simple_tag
 def elided_page_range(paginator: Paginator, number: int) -> Iterable[int | str] | None:
-    if paginator and number:
-        return paginator.get_elided_page_range(number=number)
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def querystring_params(
     context: RequestContext, query_key: str, query_value: str
 ) -> str:
-    request = context.get("request")
-    result = QueryDict(mutable=True)
-
-    for key, values in request.GET.lists():
-        if key == query_key:
-            continue
-
-        for value in values:
-            result[key] = value
-
-    result[query_key] = query_value
-
-    return result.urlencode()
+    pass
 
 
 @register.simple_tag(name="unfold_querystring", takes_context=True)
@@ -640,192 +249,27 @@ def unfold_querystring(context, *args, **kwargs):
     it using in Django 4.x.
     TODO: Once 4.x is not supported, remove it.
     """
-    if not args:
-        args = [context.request.GET]
-    params = QueryDict(mutable=True)
-    for d in [*args, kwargs]:
-        if not isinstance(d, Mapping):
-            raise TemplateSyntaxError(
-                "querystring requires mappings for positional arguments (got "
-                f"{d!r} instead)."
-            )
-        for key, value in d.items():
-            if not isinstance(key, str):
-                raise TemplateSyntaxError(
-                    f"querystring requires strings for mapping keys (got {key!r} "
-                    "instead)."
-                )
-            if value is None:
-                params.pop(key, None)
-            elif isinstance(value, Iterable) and not isinstance(value, str):
-                params.setlist(key, value)
-            else:
-                params[key] = value
-    query_string = params.urlencode() if params else ""
-    return f"?{query_string}"
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def header_title(context: RequestContext) -> str:
-    parts = []
-    opts: Options | None = context.get("opts")
-    current_app = (
-        context.request.current_app
-        if hasattr(context.request, "current_app")
-        else "admin"
-    )
-
-    if opts:
-        parts.append(
-            {
-                "link": reverse_lazy(f"{current_app}:app_list", args=[opts.app_label]),
-                "title": opts.app_config.verbose_name,
-            }
-        )
-
-        if (original := context.get("original")) and not isinstance(original, str):
-            parts.append(
-                {
-                    "link": reverse_lazy(
-                        f"{current_app}:{original._meta.app_label}_{original._meta.model_name}_changelist"
-                    ),
-                    "title": original._meta.verbose_name_plural,
-                }
-            )
-
-            parts.append(
-                {
-                    "link": reverse_lazy(
-                        f"{current_app}:{original._meta.app_label}_{original._meta.model_name}_change",
-                        args=[original.pk],
-                    ),
-                    "title": original,
-                }
-            )
-        elif object := context.get("object"):
-            parts.append(
-                {
-                    "link": reverse_lazy(
-                        f"{current_app}:{object._meta.app_label}_{object._meta.model_name}_changelist"
-                    ),
-                    "title": object._meta.verbose_name_plural,
-                }
-            )
-
-            parts.append(
-                {
-                    "link": reverse_lazy(
-                        f"{current_app}:{object._meta.app_label}_{object._meta.model_name}_change",
-                        args=[object.pk],
-                    ),
-                    "title": object,
-                }
-            )
-        else:
-            parts.append(
-                {
-                    "link": reverse_lazy(
-                        f"{current_app}:{opts.app_label}_{opts.model_name}_changelist"
-                    ),
-                    "title": opts.verbose_name_plural,
-                }
-            )
-    elif object := context.get("object"):
-        parts.append(
-            {
-                "link": reverse_lazy(
-                    f"{current_app}:app_list", args=[object._meta.app_label]
-                ),
-                "title": object._meta.app_label,
-            }
-        )
-
-        parts.append(
-            {
-                "link": reverse_lazy(
-                    f"{current_app}:{object._meta.app_label}_{object._meta.model_name}_changelist",
-                ),
-                "title": object._meta.verbose_name_plural,
-            }
-        )
-
-        parts.append(
-            {
-                "link": reverse_lazy(
-                    f"{current_app}:{object._meta.app_label}_{object._meta.model_name}_change",
-                    args=[object.pk],
-                ),
-                "title": object,
-            }
-        )
-    elif (model_admin := context.get("model_admin")) and hasattr(model_admin, "model"):
-        parts.append(
-            {
-                "link": reverse_lazy(
-                    f"{current_app}:app_list", args=[model_admin.model._meta.app_label]
-                ),
-                "title": model_admin.model._meta.app_config.verbose_name,
-            }
-        )
-
-        parts.append(
-            {
-                "link": reverse_lazy(
-                    f"{current_app}:{model_admin.model._meta.app_label}_{model_admin.model._meta.model_name}_changelist",
-                ),
-                "title": model_admin.model._meta.verbose_name_plural,
-            }
-        )
-
-    if not opts and (content_title := context.get("content_title")):
-        parts.append(
-            {
-                "title": content_title,
-            }
-        )
-
-    if len(parts) == 0:
-        user = context.request.user
-        username = user.get_username()
-
-        if hasattr(user, "get_short_name") and callable(user.get_short_name):
-            username = user.get_username()
-
-            if isinstance(user, AbstractUser):
-                username = user.get_short_name() or user.get_username()
-
-        parts.append({"title": f"{_('Welcome')} {username}"})
-
-    return render_to_string(
-        "unfold/helpers/header_title.html",
-        request=context.request,
-        context={
-            "parts": parts,
-        },
-    )
+    pass
 
 
 @register.simple_tag(takes_context=True)
 def admin_object_app_url(context: RequestContext, object: Model, arg: str) -> str:
-    current_app = (
-        context.request.current_app
-        if hasattr(context.request, "current_app")
-        else "admin"
-    )
-
-    return f"{current_app}:{object._meta.app_label}_{object._meta.model_name}_{arg}"
+    pass
 
 
 @register.filter
 def has_nested_tables(table: dict) -> bool:
-    return any(
-        isinstance(row, dict) and "table" in row for row in table.get("rows", [])
-    )
+    pass
 
 
 @register.filter
 def inline_add_button_text(json_string: str) -> str:
-    return json.loads(json_string)["options"]["addText"]
+    pass
 
 
 class RenderCaptureNode(Node):
@@ -851,80 +295,29 @@ class RenderCaptureNode(Node):
 
 @register.tag(name="capture")
 def do_capture(parser: Parser, token: Token) -> RenderCaptureNode:
-    parts = token.split_contents()
-    variable_name = ""
-    silent = False
-
-    if len(parts) > 4:  # noqa: PLR2004
-        raise TemplateSyntaxError("Too many arguments for 'capture' tag.")
-
-    if len(parts) >= 3:  # noqa: PLR2004
-        if parts[1] != "as":
-            raise TemplateSyntaxError("'as' is required for 'capture' tag.")
-
-        variable_name = parts[2]
-
-    if len(parts) == 4:  # noqa: PLR2004
-        if parts[3] != "silent":
-            raise TemplateSyntaxError("'silent' is required for 'capture' tag.")
-
-        silent = True
-
-    nodelist = parser.parse(("endcapture",))
-    parser.delete_first_token()
-    return RenderCaptureNode(nodelist, variable_name, silent)
+    pass
 
 
 @register.filter
 def tabs_active(fieldsets: list[Fieldset]) -> str:
-    active = ""
-
-    if len(fieldsets) > 0 and hasattr(fieldsets[0], "name"):
-        active = slugify(str(fieldsets[0].name), allow_unicode=True)
-
-    for fieldset in fieldsets:
-        for field_line in fieldset:
-            for field in field_line:
-                if (
-                    not field.is_readonly
-                    and field.errors()
-                    and hasattr(fieldset, "name")
-                ):
-                    active = slugify(str(fieldset.name), allow_unicode=True)
-
-    return active
+    pass
 
 
 @register.filter
 def tabs_errors_count(fieldset: Fieldset) -> int:
-    count = 0
-
-    for field_line in fieldset:
-        for field in field_line:
-            if not field.is_readonly and field.errors():
-                count += 1
-
-    return count
+    pass
 
 
 @register.simple_tag
 def tabs_primary_active(inlines: list[InlineAdminFormSet]) -> str:
-    active = "general"
-
-    for inline in inlines:
-        if getattr(inline.opts, "tab", False) and inline.formset.errors:
-            for error in inline.formset.errors:
-                if isinstance(error, dict) and len(error) > 0:
-                    active = slugify(str(inline.formset.prefix), allow_unicode=True)
-
-    return active
+    pass
 
 
 @register.filter
 def unicoded_slugify(value: str) -> str:
-    return slugify(value, allow_unicode=True)
+    pass
 
 
 @register.filter
 def format_traceback(traceback: str) -> str:
-    return prettify_traceback(traceback) or ""
+    pass

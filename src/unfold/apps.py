@@ -10,10 +10,7 @@ class DefaultAppConfig(AppConfig):
     default = True
 
     def ready(self):
-        site = UnfoldAdminSite()
-
-        admin.site = site
-        sites.site = site
+        pass
 
 
 class BasicAppConfig(AppConfig):

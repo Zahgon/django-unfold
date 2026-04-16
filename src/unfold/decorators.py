@@ -28,45 +28,7 @@ def action(
             *args: Any,
             **kwargs,
         ) -> HttpResponse | None:
-            if permissions:
-                permission_rules = []
-
-                for permission in permissions:
-                    if "." in permission:
-                        permission_rules.append(permission)
-                    else:
-                        # Permissions methods have following syntax: has_<some>_permission(self, request, obj=None):
-                        # But obj is not examined by default in django admin and it would also require additional
-                        # fetch from database, therefore it is not supported yet
-                        permission_rules.append(
-                            getattr(model_admin, f"has_{permission}_permission")
-                        )
-
-                has_detail_action = func.__name__ in model_admin._extract_action_names(
-                    model_admin.actions_detail
-                )
-                has_submit_line_action = (
-                    func.__name__
-                    in model_admin._extract_action_names(
-                        model_admin.actions_submit_line
-                    )
-                )
-
-                permission_checks = []
-
-                for permission_rule in permission_rules:
-                    if isinstance(permission_rule, str) and "." in permission_rule:
-                        permission_checks.append(request.user.has_perm(permission_rule))
-                    elif has_detail_action or has_submit_line_action:
-                        permission_checks.append(
-                            permission_rule(request, kwargs.get("object_id"))
-                        )
-                    else:
-                        permission_checks.append(permission_rule(request))
-
-                if not all(permission_checks):
-                    raise PermissionDenied
-            return func(model_admin, request, *args, **kwargs)
+            pass
 
         if permissions is not None:
             inner.allowed_permissions = permissions

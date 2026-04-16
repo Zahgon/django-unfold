@@ -56,28 +56,17 @@ class SingleNumericFilter(admin.FieldListFilter):
     def queryset(
         self, request: HttpRequest, queryset: QuerySet[Any]
     ) -> QuerySet | None:
-        if self.value() and self.parameter_name:
-            try:
-                return queryset.filter(**{self.parameter_name: self.value()})
-            except (ValueError, ValidationError):
-                return None
+        pass
 
     def value(self) -> Any:
         if self.parameter_name:
             return self.used_parameters.get(self.parameter_name)
 
     def expected_parameters(self) -> list[str | None]:
-        return [self.parameter_name]
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        if self.parameter_name:
-            yield {
-                "request": self.request,
-                "parameter_name": self.parameter_name,
-                "form": SingleNumericForm(
-                    name=self.parameter_name, data={self.parameter_name: self.value()}
-                ),
-            }
+        pass
 
 
 class RangeNumericListFilter(RangeNumericMixin, admin.SimpleListFilter):
@@ -96,7 +85,7 @@ class RangeNumericListFilter(RangeNumericMixin, admin.SimpleListFilter):
     def lookups(
         self, request: HttpRequest, model_admin: ModelAdmin
     ) -> tuple[tuple[str, str], ...]:
-        return (("dummy", "dummy"),)
+        pass
 
 
 class RangeNumericFilter(RangeNumericMixin, admin.FieldListFilter):
@@ -145,51 +134,7 @@ class SliderNumericFilter(RangeNumericFilter):
         self.q = model_admin.get_queryset(request)
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        total = self.q.all().count()
-        min_value = self.q.all().aggregate(min=Min(self.parameter_name)).get("min", 0)
-        max_value = None
-
-        if total > 1:
-            max_value = (
-                self.q.all().aggregate(max=Max(self.parameter_name)).get("max", 0)
-            )
-
-        decimals = 0
-        step = self.STEP if self.STEP else 1
-
-        if isinstance(self.field, FloatField | DecimalField):
-            decimals = self.MAX_DECIMALS
-            step = self.STEP if self.STEP else self._get_min_step(self.MAX_DECIMALS)
-
-        if self.parameter_name:
-            yield {
-                "decimals": decimals,
-                "step": step,
-                "parameter_name": self.parameter_name,
-                "request": self.request,
-                "min": min_value,
-                "max": max_value,
-                "value_from": self.used_parameters.get(
-                    self.parameter_name + "_from", min_value
-                ),
-                "value_to": self.used_parameters.get(
-                    self.parameter_name + "_to", max_value
-                ),
-                "form": self.form_class(
-                    name=self.parameter_name,
-                    min=min_value,
-                    max=max_value,
-                    data={
-                        self.parameter_name + "_from": self.used_parameters.get(
-                            self.parameter_name + "_from", min_value
-                        ),
-                        self.parameter_name + "_to": self.used_parameters.get(
-                            self.parameter_name + "_to", max_value
-                        ),
-                    },
-                ),
-            }
+        pass
 
     def _get_min_step(self, precision: int) -> float:
-        result_format = f"{{:.{precision - 1}f}}"
-        return float(result_format.format(0) + "1")
+        pass

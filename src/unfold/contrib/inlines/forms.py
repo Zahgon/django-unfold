@@ -19,16 +19,10 @@ class NonrelatedInlineModelFormSet(PaginationFormSetMixin, BaseModelFormSet):
 
     @classmethod
     def get_default_prefix(cls: BaseModelFormSet) -> str:
-        return f"{cls.model._meta.app_label}-{cls.model._meta.model_name}"
+        pass
 
     def save_new(self, form: ModelForm, commit: bool = True):
-        obj = super().save_new(form, commit=False)
-        self.save_new_instance(self.instance, obj)
-
-        if commit:
-            obj.save()
-
-        return obj
+        pass
 
 
 def nonrelated_inline_formset_factory(

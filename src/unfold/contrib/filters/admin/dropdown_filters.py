@@ -23,26 +23,7 @@ class DropdownFilter(admin.SimpleListFilter):
     all_option = ["", _("All")]
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-        choices = [self.all_option] if self.all_option else []
-
-        for i, choice in enumerate(self.lookup_choices):
-            if add_facets and facet_counts:
-                count = facet_counts[f"{i}__c"]
-                choices.append((choice[0], f"{choice[1]} ({count})"))
-            else:
-                choices.append(choice)
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.parameter_name,
-                choices=choices,
-                data={self.parameter_name: self.value()},
-                multiple=self.multiple if hasattr(self, "multiple") else False,
-            ),
-        }
+        pass
 
 
 class MultipleDropdownFilter(DropdownFilter):
@@ -71,32 +52,10 @@ class MultipleDropdownFilter(DropdownFilter):
 
 class ChoicesDropdownFilter(ValueMixin, DropdownMixin, admin.ChoicesFieldListFilter):
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet | None:
-        if self.value() not in EMPTY_VALUES:
-            return super().queryset(request, queryset)
-
-        return queryset
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-
-        choices = [self.all_option] if self.all_option else []
-        for i, choice in enumerate(self.field.flatchoices):
-            if add_facets and facet_counts:
-                count = facet_counts[f"{i}__c"]
-                choices.append((choice[0], f"{choice[1]} ({count})"))
-            else:
-                choices.append(choice)
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                choices=choices,
-                data={self.lookup_kwarg: self.value()},
-                multiple=self.multiple if hasattr(self, "multiple") else False,
-            ),
-        }
+        pass
 
 
 class MultipleChoicesDropdownFilter(MultiValueMixin, ChoicesDropdownFilter):
@@ -118,34 +77,10 @@ class RelatedDropdownFilter(ValueMixin, DropdownMixin, admin.RelatedFieldListFil
         self.request = request
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet | None:
-        if self.value() not in EMPTY_VALUES:
-            return super().queryset(request, queryset)
-
-        return queryset
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-
-        if add_facets and facet_counts:
-            choices = [self.all_option]
-
-            for pk_val, val in self.lookup_choices:
-                count = facet_counts[f"{pk_val}__c"]
-                choice = (pk_val, f"{val} ({count})")
-                choices.append(choice)
-        else:
-            choices = [self.all_option, *self.lookup_choices]
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                choices=choices,
-                data={self.lookup_kwarg: self.value()},
-                multiple=self.multiple if hasattr(self, "multiple") else False,
-            ),
-        }
+        pass
 
 
 class MultipleRelatedDropdownFilter(MultiValueMixin, RelatedDropdownFilter):

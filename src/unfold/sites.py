@@ -23,7 +23,7 @@ try:
 except ImportError:
 
     def login_not_required(func: Callable) -> Callable:
-        return func
+        pass
 
 
 from unfold.settings import get_config
@@ -47,20 +47,7 @@ class UnfoldAdminSite(AdminSite):
             self.login_form = AuthenticationForm
 
     def get_urls(self) -> list[URLPattern]:
-        extra_urls = []
-
-        if hasattr(self, "extra_urls") and callable(self.extra_urls):
-            extra_urls = self.extra_urls()
-
-        urlpatterns = (
-            [
-                path("search/", self.admin_view(self.search), name="search"),
-            ]
-            + extra_urls
-            + super().get_urls()
-        )
-
-        return urlpatterns
+        pass
 
     def each_context(self, request: HttpRequest) -> dict[str, Any]:
         context = super().each_context(request)
@@ -137,61 +124,12 @@ class UnfoldAdminSite(AdminSite):
     def index(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> TemplateResponse:
-        app_list = self.get_app_list(request)
-
-        context = {
-            **self.each_context(request),
-            "title": self.index_title,
-            "subtitle": None,
-            "app_list": app_list,
-            "index": True,
-            **(extra_context or {}),
-        }
-
-        dashboard_callback = get_config(self.settings_name)["DASHBOARD_CALLBACK"]
-
-        if isinstance(dashboard_callback, str):
-            context = import_string(dashboard_callback)(request, context)
-
-        request.current_app = self.name
-
-        return TemplateResponse(
-            request, self.index_template or "admin/index.html", context
-        )
+        pass
 
     def _search_apps(
         self, app_list: list[dict[str, Any]], search_term: str
     ) -> list[SearchResult]:
-        results = []
-        apps = []
-
-        for app in app_list:
-            if search_term in app["name"].lower():
-                apps.append(app)
-                continue
-
-            models = []
-
-            for model in app["models"]:
-                if search_term in model["name"].lower():
-                    models.append(model)
-
-            if len(models) > 0:
-                app["models"] = models
-                apps.append(app)
-
-        for app in apps:
-            for model in app["models"]:
-                results.append(
-                    SearchResult(
-                        title=str(model["name"]),
-                        description=app["name"],
-                        link=model["admin_url"],
-                        icon="tag",
-                    )
-                )
-
-        return results
+        pass
 
     def _search_models(
         self,
@@ -200,149 +138,17 @@ class UnfoldAdminSite(AdminSite):
         search_term: str,
         allowed_models: list[str] | None = None,
     ) -> list[SearchResult]:
-        results = []
-
-        for app in app_list:
-            for model in app["models"]:
-                # Skip models which are not allowed
-                if isinstance(allowed_models, list | tuple):
-                    if model["model"]._meta.label.lower() not in [
-                        m.lower() for m in allowed_models
-                    ]:
-                        continue
-
-                admin_instance = self._registry.get(model["model"])
-                search_fields = admin_instance.get_search_fields(request)
-
-                if not search_fields:
-                    continue
-
-                pks = []
-
-                qs = admin_instance.get_queryset(request)
-                search_results, _has_duplicates = admin_instance.get_search_results(
-                    request, qs, search_term
-                )
-
-                for item in search_results:
-                    if item.pk in pks:
-                        continue
-
-                    pks.append(item.pk)
-
-                    link = reverse_lazy(
-                        f"{self.name}:{admin_instance.model._meta.app_label}_{admin_instance.model._meta.model_name}_change",
-                        args=(item.pk,),
-                    )
-
-                    results.append(
-                        SearchResult(
-                            title=str(item),
-                            description=f"{item._meta.app_label.capitalize()} - {item._meta.verbose_name.capitalize()}",
-                            link=link,
-                            icon="data_object",
-                        )
-                    )
-
-        return results
+        pass
 
     def search(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> TemplateResponse:
-        start_time = time.time()
-
-        CACHE_TIMEOUT = 5 * 60
-        PER_PAGE = 100
-
-        search_term = request.GET.get("s")
-        extended_search = "extended" in request.GET
-        app_list = super().get_app_list(request)
-        template_name = "unfold/helpers/search_results.html"
-
-        if search_term in EMPTY_VALUES:
-            return HttpResponse()
-
-        search_term = search_term.lower()
-        search_key_base = f"{request.user.pk}_{search_term}"
-        cache_key = (
-            f"unfold_search_{hashlib.sha256(force_bytes(search_key_base)).hexdigest()}"
-        )
-        cache_results = cache.get(cache_key)
-
-        if extended_search:
-            template_name = "unfold/helpers/command_results.html"
-
-        if cache_results:
-            results = cache_results
-        else:
-            results = self._search_apps(app_list, search_term)
-
-            if extended_search:
-                if search_callback := self._get_config("COMMAND", request).get(
-                    "search_callback"
-                ):
-                    results.extend(
-                        self._get_value(search_callback, request, search_term)
-                    )
-
-                search_models = self._get_value(
-                    self._get_config("COMMAND", request).get("search_models"), request
-                )
-
-                if search_models is True or isinstance(search_models, list | tuple):
-                    allowed_models = (
-                        search_models
-                        if isinstance(search_models, list | tuple)
-                        else None
-                    )
-
-                    results.extend(
-                        self._search_models(
-                            request, app_list, search_term, allowed_models
-                        )
-                    )
-
-            cache.set(cache_key, results, timeout=CACHE_TIMEOUT)
-
-        execution_time = time.time() - start_time
-        paginator = Paginator(results, PER_PAGE)
-
-        show_history = self._get_value(
-            self._get_config("COMMAND", request).get("show_history"), request
-        )
-
-        return TemplateResponse(
-            request,
-            template=template_name,
-            context={
-                "page_obj": paginator,
-                "results": paginator.page(request.GET.get("page", 1)),
-                "page_counter": (int(request.GET.get("page", 1)) - 1) * PER_PAGE,
-                "execution_time": execution_time,
-                "command_show_history": show_history,
-            },
-            headers={
-                "HX-Trigger": "search",
-            },
-        )
+        pass
 
     def password_change(
         self, request: HttpRequest, extra_context: dict[str, Any] | None = None
     ) -> HttpResponse:
-        from django.contrib.auth.views import PasswordChangeView
-
-        from unfold.forms import AdminOwnPasswordChangeForm
-
-        url = reverse(f"{self.name}:password_change_done", current_app=self.name)
-        defaults = {
-            "form_class": AdminOwnPasswordChangeForm,
-            "success_url": url,
-            "extra_context": {**self.each_context(request), **(extra_context or {})},
-        }
-        if self.password_change_template is not None:
-            defaults["template_name"] = self.password_change_template
-        request.current_app = self.name
-        return PasswordChangeView.as_view(**defaults)(request)
+        pass
 
     def get_sidebar_list(self, request: HttpRequest) -> list[dict[str, Any]]:
         navigation = self._get_value(
@@ -477,13 +283,7 @@ class UnfoldAdminSite(AdminSite):
         return False
 
     def _replace_values(self, target: dict, source: dict, request: HttpRequest):
-        for key, value in source.items():
-            if value is not None and callable(value):
-                target[key] = value(request)
-            else:
-                target[key] = value
-
-        return target
+        pass
 
     def _get_is_active(
         self, request: HttpRequest, link: str | Callable, is_tab: bool = False

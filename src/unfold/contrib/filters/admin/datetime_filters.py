@@ -53,43 +53,13 @@ class RangeDateFilter(admin.FieldListFilter):
                 self.used_parameters[self.field_path + "_to"] = value
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet | None:
-        filters = {}
-
-        value_from = self.used_parameters.get(f"{self.parameter_name}_from")
-        if value_from not in EMPTY_VALUES and isinstance(value_from, str):
-            filters.update({f"{self.parameter_name}__gte": parse_date_str(value_from)})
-
-        value_to = self.used_parameters.get(f"{self.parameter_name}_to")
-        if value_to not in EMPTY_VALUES and isinstance(value_to, str):
-            filters.update({f"{self.parameter_name}__lte": parse_date_str(value_to)})
-
-        try:
-            return queryset.filter(**filters)
-        except (ValueError, ValidationError):
-            return None
+        pass
 
     def expected_parameters(self) -> list[str | None]:
-        return [
-            f"{self.parameter_name}_from",
-            f"{self.parameter_name}_to",
-        ]
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        yield {
-            "request": self.request,
-            "parameter_name": self.parameter_name,
-            "form": self.form_class(
-                name=self.parameter_name,
-                data={
-                    f"{self.parameter_name}_from": self.used_parameters.get(
-                        f"{self.parameter_name}_from", None
-                    ),
-                    f"{self.parameter_name}_to": self.used_parameters.get(
-                        f"{self.parameter_name}_to", None
-                    ),
-                },
-            ),
-        }
+        pass
 
 
 class RangeDateTimeFilter(admin.FieldListFilter):
@@ -138,64 +108,10 @@ class RangeDateTimeFilter(admin.FieldListFilter):
             self.used_parameters[self.field_path + "_to_1"] = value
 
     def expected_parameters(self) -> list[str | None]:
-        return [
-            f"{self.parameter_name}_from_0",
-            f"{self.parameter_name}_from_1",
-            f"{self.parameter_name}_to_0",
-            f"{self.parameter_name}_to_1",
-        ]
+        pass
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet | None:
-        filters = {}
-
-        date_value_from = self.used_parameters.get(f"{self.parameter_name}_from_0")
-        time_value_from = self.used_parameters.get(f"{self.parameter_name}_from_1")
-
-        date_value_to = self.used_parameters.get(f"{self.parameter_name}_to_0")
-        time_value_to = self.used_parameters.get(f"{self.parameter_name}_to_1")
-
-        if date_value_from not in EMPTY_VALUES and time_value_from not in EMPTY_VALUES:
-            filters.update(
-                {
-                    f"{self.parameter_name}__gte": parse_datetime_str(
-                        f"{date_value_from} {time_value_from}"
-                    ),
-                }
-            )
-
-        if date_value_to not in EMPTY_VALUES and time_value_to not in EMPTY_VALUES:
-            filters.update(
-                {
-                    f"{self.parameter_name}__lte": parse_datetime_str(
-                        f"{date_value_to} {time_value_to}"
-                    ),
-                }
-            )
-
-        try:
-            return queryset.filter(**filters)
-        except (ValueError, ValidationError):
-            return None
+        pass
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        yield {
-            "request": self.request,
-            "parameter_name": self.parameter_name,
-            "form": self.form_class(
-                name=self.parameter_name,
-                data={
-                    f"{self.parameter_name}_from_0": self.used_parameters.get(
-                        f"{self.parameter_name}_from_0"
-                    ),
-                    f"{self.parameter_name}_from_1": self.used_parameters.get(
-                        f"{self.parameter_name}_from_1"
-                    ),
-                    f"{self.parameter_name}_to_0": self.used_parameters.get(
-                        f"{self.parameter_name}_to_0"
-                    ),
-                    f"{self.parameter_name}_to_1": self.used_parameters.get(
-                        f"{self.parameter_name}_to_1"
-                    ),
-                },
-            ),
-        }
+        pass

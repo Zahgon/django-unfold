@@ -227,24 +227,13 @@ class PaginationFormSetMixin:
             self._queryset = self.page.object_list
 
     def get_pagination_key(self) -> str:
-        return f"{self.prefix}-page"
+        pass
 
     def get_page_num(self) -> int:
-        page = self.request.GET.get(self.get_pagination_key())
-        if page and page.isnumeric() and page > "0":
-            return int(page)
-
-        page = self.request.POST.get(self.get_pagination_key())
-        if page and page.isnumeric() and page > "0":
-            return int(page)
-
-        return 1
+        pass
 
     def get_page(self, paginator: Paginator, page: int) -> Page:
-        if page <= paginator.num_pages:
-            return paginator.page(page)
-
-        return paginator.page(1)
+        pass
 
 
 class PaginationInlineFormSet(PaginationFormSetMixin, BaseInlineFormSet):

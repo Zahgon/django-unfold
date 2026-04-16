@@ -22,29 +22,7 @@ class RadioFilter(admin.SimpleListFilter):
     all_option = ["", _("All")]
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-        choices = []
-
-        if self.all_option:
-            choices = [self.all_option]
-
-        if add_facets:
-            for i, (lookup, title) in enumerate(self.lookup_choices):
-                choices.append(
-                    (lookup, f"{title} ({facet_counts.get(f'{i}__c', '-')})")
-                )
-        else:
-            choices.extend(self.lookup_choices)
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.parameter_name,
-                choices=choices,
-                data={self.parameter_name: self.value()},
-            ),
-        }
+        pass
 
 
 class CheckboxFilter(RadioFilter):
@@ -85,34 +63,7 @@ class BooleanRadioFilter(ValueMixin, admin.BooleanFieldListFilter):
     all_option = ["", _("All")]
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-
-        if add_facets and facet_counts:
-            choices = [
-                self.all_option,
-                *[
-                    ("1", f"{_('Yes')} ({facet_counts['true__c']})"),
-                    ("0", f"{_('No')} ({facet_counts['false__c']})"),
-                ],
-            ]
-        else:
-            choices = [
-                self.all_option,
-                *[
-                    ("1", _("Yes")),
-                    ("0", _("No")),
-                ],
-            ]
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                choices=choices,
-                data={self.lookup_kwarg: self.value()},
-            ),
-        }
+        pass
 
 
 class RelatedCheckboxFilter(MultiValueMixin, admin.RelatedFieldListFilter):
@@ -120,27 +71,7 @@ class RelatedCheckboxFilter(MultiValueMixin, admin.RelatedFieldListFilter):
     form_class = CheckboxForm
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-
-        if add_facets and facet_counts:
-            choices = []
-
-            for pk_val, val in self.lookup_choices:
-                count = facet_counts[f"{pk_val}__c"]
-                choice = (pk_val, f"{val} ({count})")
-                choices.append(choice)
-        else:
-            choices = self.lookup_choices
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                choices=choices,
-                data={self.lookup_kwarg: self.value()},
-            ),
-        }
+        pass
 
 
 class AllValuesCheckboxFilter(MultiValueMixin, admin.AllValuesFieldListFilter):
@@ -148,24 +79,4 @@ class AllValuesCheckboxFilter(MultiValueMixin, admin.AllValuesFieldListFilter):
     form_class = CheckboxForm
 
     def choices(self, changelist: ChangeList) -> Iterator:
-        add_facets = getattr(changelist, "add_facets", False)
-        facet_counts = self.get_facet_queryset(changelist) if add_facets else None
-
-        if add_facets and facet_counts:
-            choices = []
-
-            for i, val in enumerate(self.lookup_choices):
-                count = facet_counts[f"{i}__c"]
-                choice = (val, f"{val} ({count})")
-                choices.append(choice)
-        else:
-            choices = [[val, val] for _i, val in enumerate(self.lookup_choices)]
-
-        yield {
-            "form": self.form_class(
-                label=_(" By %(filter_title)s ") % {"filter_title": self.title},
-                name=self.lookup_kwarg,
-                choices=choices,
-                data={self.lookup_kwarg: self.value()},
-            ),
-        }
+        pass

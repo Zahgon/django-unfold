@@ -80,55 +80,20 @@ class ModelAdmin(
 
     @property
     def media(self):
-        media = super().media
-
-        if hasattr(self, "nested_formset_media"):
-            media += self.nested_formset_media
-
-        if not hasattr(self, "request"):
-            return media
-
-        for filter in self.get_list_filter(self.request):
-            if (
-                isinstance(filter, tuple | list)
-                and hasattr(filter[1], "form_class")
-                and hasattr(filter[1].form_class, "Media")
-            ):
-                media += forms.Media(filter[1].form_class.Media)
-            elif hasattr(filter, "form_class") and hasattr(filter.form_class, "Media"):
-                media += forms.Media(filter.form_class.Media)
-
-        return media
+        pass
 
     def changelist_view(
         self, request: HttpRequest, extra_context: dict[str, str] | None = None
     ) -> TemplateResponse:
-        self.request = request
-
-        if self.ordering_field and self.ordering_field not in self.list_editable:
-            list_editable = list(getattr(self, "list_editable", []))
-            list_editable.append(self.ordering_field)
-            self.list_editable = list_editable
-
-        return super().changelist_view(request, extra_context)
+        pass
 
     def get_list_display(self, request: HttpRequest) -> list | tuple:
-        list_display = super().get_list_display(request)
-
-        if self.ordering_field and self.ordering_field not in list_display:
-            if isinstance(list_display, tuple):
-                list_display = (*list_display, self.ordering_field)
-            elif isinstance(list_display, list):
-                list_display.append(self.ordering_field)
-
-        return list_display
+        pass
 
     def get_fieldsets(
         self, request: HttpRequest, obj: Model | None = None
     ) -> FieldsetsType:
-        if not obj and self.add_fieldsets:
-            return self.add_fieldsets
-        return super().get_fieldsets(request, obj)
+        pass
 
     def get_custom_urls(self) -> tuple[tuple[str, str, View], ...]:
         """
@@ -137,103 +102,35 @@ class ModelAdmin(
         Format of custom_urls item:
             ("path_to_view", "name_of_view", view_itself)
         """
-        return () if self.custom_urls is None else self.custom_urls
+        pass
 
     def get_urls(self) -> list[URLPattern]:
-        urls = super().get_urls()
-
-        def wrap(view):
-            def wrapper(*args, **kwargs):
-                return self.admin_site.admin_view(view)(*args, **kwargs)
-
-            wrapper.model_admin = self
-            return update_wrapper(wrapper, view)
-
-        custom_urls = [
-            self._path_from_custom_url(custom_url)
-            for custom_url in self.get_custom_urls()
-        ]
-
-        actions_list_urls = [
-            path(
-                f"{action.path.removesuffix('/')}/",
-                wrap(action.method),
-                name=action.action_name,
-            )
-            for action in self._get_base_actions_list()
-        ]
-
-        action_detail_urls = [
-            path(
-                f"<path:object_id>/{action.path.removesuffix('/')}/",
-                wrap(action.method),
-                name=action.action_name,
-            )
-            for action in self._get_base_actions_detail()
-        ]
-
-        action_row_urls = [
-            path(
-                f"<path:object_id>/{action.path.removesuffix('/')}/",
-                wrap(action.method),
-                name=action.action_name,
-            )
-            for action in self._get_base_actions_row()
-        ]
-
-        return (
-            custom_urls
-            + action_row_urls
-            + actions_list_urls
-            + action_detail_urls
-            + urls
-        )
+        pass
 
     def _path_from_custom_url(self, custom_url: tuple[str, str, View]) -> URLPattern:
-        return path(
-            custom_url[0],
-            self.admin_site.admin_view(custom_url[2]),
-            {"model_admin": self},
-            name=custom_url[1],
-        )
+        pass
 
     def get_action_choices(
         self,
         request: HttpRequest,
         default_choices: list[tuple[str, str]] = BLANK_CHOICE_DASH,
     ) -> list[tuple[str, str]]:
-        default_choices = [("", _("Select action"))]
-        return super().get_action_choices(request, default_choices)
+        pass
 
     @display(description=mark_safe(checkbox.render("action_toggle_all", 1)))
     def action_checkbox(self, obj: Model) -> str:
-        return checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.pk))
+        pass
 
     def get_changelist(self, request: HttpRequest, **kwargs: Any) -> ChangeList:
-        return ChangeList
+        pass
 
     def get_formset_kwargs(
         self, request: HttpRequest, obj: Model, inline: InlineModelAdmin, prefix: str
     ) -> dict[str, Any]:
-        formset_kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
-
-        if hasattr(inline, "per_page") and inline.per_page:
-            formset_kwargs["request"] = request
-            formset_kwargs["per_page"] = inline.per_page
-
-        if hasattr(inline, "show_count") and inline.show_count:
-            if hasattr(inline, "get_count") and callable(inline.get_count):
-                formset_kwargs["count"] = inline.get_count(request, obj)
-
-            if hasattr(inline, "get_count_variant") and callable(
-                inline.get_count_variant
-            ):
-                formset_kwargs["count_variant"] = inline.get_count_variant(request, obj)
-
-        return formset_kwargs
+        pass
 
     def get_changeform_datasets(self, request: HttpRequest) -> list[type[BaseDataset]]:
-        return self.change_form_datasets
+        pass
 
 
 class BaseInlineMixin:

@@ -8,9 +8,9 @@ class NonrelatedModelAdminChecks(InlineModelAdminChecks):
     def _check_exclude_of_parent_model(
         self, obj: InlineModelAdmin, parent_model: Model
     ) -> list[CheckMessage]:
-        return []
+        pass
 
     def _check_relation(
         self, obj: InlineModelAdmin, parent_model: Model
     ) -> list[CheckMessage]:
-        return []
+        pass
